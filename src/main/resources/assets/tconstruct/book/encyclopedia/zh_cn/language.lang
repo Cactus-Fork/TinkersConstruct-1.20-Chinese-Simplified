@@ -3,7 +3,8 @@ intro=介绍
 tools=工具
 tools.group_small=小型工具
 tools.group_large=宽型工具
-tools.group_staff=黏液手杖
+tools.group_ancient=远古工具
+tools.group_staff=手杖
 tools.tconstruct.earth_staff=大地黏液手杖
 tools.tconstruct.sky_staff=碧空黏液手杖
 tools.tconstruct.ichor_staff=灵浆手杖
@@ -31,7 +32,7 @@ upgrades.group_armor.helmet=头盔升级
 upgrades.group_armor.chestplate=胸甲升级
 upgrades.group_armor.leggings=护腿升级
 upgrades.group_armor.boots=靴子升级
-upgrades.boots.tconstruct.feather_falling=摔落缓冲
+upgrades.boots.tconstruct.feather_falling=摔落保护
 # can add other modifiers using [section].[prefix].[mod_id].[modifier_id], we just use this for long names
 # you should also be able to leave off feather falling in your language and it will fallback to the language .json
 # see the section json to find the prefix, any modifier type that defines that can use it
