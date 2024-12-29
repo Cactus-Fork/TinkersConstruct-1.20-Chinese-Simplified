@@ -422,6 +422,8 @@ public class TinkerTags {
     public static final TagKey<Item> EMBELLISHMENT_SLIME = tag("modifiable/embellishment/slime");
     /** Tools that can be dyed */
     public static final TagKey<Item> DYEABLE = tag("modifiable/dyeable");
+    /** Armor items that support trim */
+    public static final TagKey<Item> TRIM = tag("modifiable/armor/trim");
     /** Tools to blacklist from default salvage recipes. May still be salvagable in other recipes */
     public static final TagKey<Item> UNSALVAGABLE = tag("modifiable/unsalvageable");
 
@@ -471,6 +473,9 @@ public class TinkerTags {
     public static final TagKey<Fluid> CHEAP_METAL_SPILLING = tag("spilling/metal/cheap");
     public static final TagKey<Fluid> AVERAGE_METAL_SPILLING = tag("spilling/metal/average");
     public static final TagKey<Fluid> EXPENSIVE_METAL_SPILLING = tag("spilling/metal/expensive");
+
+    /** Fluids in this tag won't show in the creative filled tanks */
+    public static final TagKey<Fluid> HIDE_IN_CREATIVE = tag("hide_in_creative");
 
     private static TagKey<Fluid> tag(String name) {
       return TagKey.create(Registries.FLUID, TConstruct.getResource(name));
