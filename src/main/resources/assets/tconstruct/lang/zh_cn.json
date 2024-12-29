@@ -2023,6 +2023,10 @@
   "modifier.tconstruct.dyed.formatted": "染色#%s",
   "modifier.tconstruct.dyed.flavor": "外观改变了！",
   "modifier.tconstruct.dyed.description": "改变盔甲的外观，就好像换了一种制作材料",
+  "modifier.tconstruct.trim": "盔甲纹饰",
+  "modifier.tconstruct.trim.formatted": "%s (%s)",
+  "modifier.tconstruct.trim.flavor": "繁琐的细节！",
+  "modifier.tconstruct.trim.description": "使用昂贵的锻造模板为盔甲增添细节",
 
   "_comment": "Armor - Protection",
   "modifier.tconstruct.protection": "保护",
@@ -2906,6 +2910,9 @@
   "recipe.tconstruct.modifier.max_level": "此配方只可将%s等级升至%s（忽略材料特性）",
   "recipe.tconstruct.modifier.min_level.traits": "此配方需要工具加持%s（包含材料特性）",
   "recipe.tconstruct.modifier.max_level.traits": "此配方只可将%s等级升至%s（包含材料特性）",
+
+  "recipe.tconstruct.modifier.armor_trim.invalid_material": "%s不是一个有效的锻造原材料，这通常表示标签无效",
+  "recipe.tconstruct.modifier.armor_trim.invalid_pattern": "%s不是一个有效的盔甲纹饰锻造模板，这通常表示标签无效",
 
   "recipe.tconstruct.tool_recycling": "工具回收",
   "recipe.tconstruct.tool_recycling.info": "从组装此工具的工具部件中选择你想回收的一个。根据工具剩余的耐久度多少，甚至有可能回收第2个工具部件。",
