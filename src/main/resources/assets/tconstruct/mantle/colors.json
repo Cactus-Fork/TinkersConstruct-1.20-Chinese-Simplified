@@ -162,7 +162,7 @@
     "impaling":     "#F6E2CD",
     "power":        "#EAA727",
     "punch":        "#BC9862",
-    "quick_charge": "#7F0901",
+    "quick_charge": "#F19D25",
     "scope":        "#DE923A",
     "sinistral":    "#A6846A",
     "trueshot":     "#DC4A4A",
@@ -407,5 +407,10 @@
     "diamond":   "#55FFFF",
     "netherite": "#555555",
     "gold":      "#FFAA00"
+  },
+  "stat.tconstruct.slot": {
+    "upgrades": "#CCBA47",
+    "defense": "#A8FFA0",
+    "abilities": "#B8A0FF"
   }
 }
