@@ -6,7 +6,6 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.forge.ForgeTypes;
-import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
@@ -18,11 +17,9 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
-import mezz.jei.api.runtime.IClickableIngredient;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet.Named;
 import net.minecraft.core.RegistryAccess;
@@ -32,13 +29,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.Container;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -54,8 +49,7 @@ import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.config.Config;
 import slimeknights.tconstruct.fluids.TinkerFluids;
-import slimeknights.tconstruct.library.materials.definition.IMaterial;
-import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.fluids.fluids.PotionFluidType;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
@@ -78,7 +72,6 @@ import slimeknights.tconstruct.library.tools.helper.ToolBuildHandler;
 import slimeknights.tconstruct.library.tools.item.IModifiable;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader;
-import slimeknights.tconstruct.library.tools.nbt.MaterialIdNBT;
 import slimeknights.tconstruct.library.tools.nbt.MaterialNBT;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
@@ -100,12 +93,13 @@ import slimeknights.tconstruct.plugin.jei.partbuilder.PatternIngredientHelper;
 import slimeknights.tconstruct.plugin.jei.partbuilder.PatternIngredientRenderer;
 import slimeknights.tconstruct.plugin.jei.transfer.CraftingStationTransferInfo;
 import slimeknights.tconstruct.plugin.jei.transfer.TinkerStationTransferInfo;
-import slimeknights.tconstruct.plugin.jei.util.ClickableIngredient;
+import slimeknights.tconstruct.plugin.jei.util.GuiContainerTankHandler;
+import slimeknights.tconstruct.plugin.jei.util.PotionSubtypeInterpreter;
+import slimeknights.tconstruct.plugin.jei.util.ToolPartSubtypeInterpreter;
+import slimeknights.tconstruct.plugin.jei.util.ToolSubtypeInterpreter;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 import slimeknights.tconstruct.smeltery.block.component.SearedTankBlock.TankType;
 import slimeknights.tconstruct.smeltery.client.screen.HeatingStructureScreen;
-import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank;
-import slimeknights.tconstruct.smeltery.client.screen.IScreenWithFluidTank.FluidLocation;
 import slimeknights.tconstruct.smeltery.client.screen.MelterScreen;
 import slimeknights.tconstruct.smeltery.data.SmelteryCompat;
 import slimeknights.tconstruct.smeltery.item.CopperCanItem;
@@ -319,34 +313,12 @@ public class JEIPlugin implements IModPlugin {
     registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, TinkerSmeltery.scorchedDrain.asItem(), tables);
     registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, TinkerSmeltery.scorchedDuct.asItem(), tables);
     registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, TinkerSmeltery.scorchedChute.asItem(), tables);
-    registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, TinkerFluids.potion.asItem(), (stack, context) -> {
-      if (!stack.hasTag()) {
-        return IIngredientSubtypeInterpreter.NONE;
-      }
-      Potion potionType = PotionUtils.getPotion(stack);
-      String potionTypeString = potionType.getName("");
-      StringBuilder stringBuilder = new StringBuilder(potionTypeString);
-      List<MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
-      for (MobEffectInstance effect : effects) {
-        stringBuilder.append(";").append(effect);
-      }
-      return stringBuilder.toString();
-    });
-
-    IIngredientSubtypeInterpreter<ItemStack> toolPartInterpreter = (stack, context) -> {
-      MaterialVariantId materialId = IMaterialItem.getMaterialFromStack(stack);
-      if (materialId.equals(IMaterial.UNKNOWN_ID)) {
-        return IIngredientSubtypeInterpreter.NONE;
-      }
-      if (context == UidContext.Ingredient) {
-        return materialId.toString();
-      }
-      return materialId.getId().toString();
-    };
+    registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, TinkerFluids.potion.asItem(), (PotionSubtypeInterpreter<ItemStack>)ItemStack::getTag);
+    registry.registerSubtypeInterpreter(ForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)FluidStack::getTag);
 
     // parts
     for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.TOOL_PARTS)) {
-      registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item.value(), toolPartInterpreter);
+      registry.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, item.value(), ToolPartSubtypeInterpreter.INSTANCE);
     }
 
     // tools
@@ -492,9 +464,6 @@ public class JEIPlugin implements IModPlugin {
     }
 
     // fluid hiding, buckets are hidden via the creative tab logic
-    // hide knightslime and slimesteel until implemented
-    removeFluid(manager, TinkerFluids.moltenSoulsteel.get());
-    removeFluid(manager, TinkerFluids.moltenKnightslime.get());
     // hide compat that is not present
     for (SmelteryCompat compat : SmelteryCompat.values()) {
       if (!tagExists("ingots/" + compat.getName())) {
@@ -510,41 +479,18 @@ public class JEIPlugin implements IModPlugin {
     if (!ModList.get().isLoaded("ceramics")) {
       removeFluid(manager, TinkerFluids.moltenPorcelain.get());
     }
+
+    // add potion fluids for each potion variant if requested
+    if (Config.CLIENT.showPotionFluidInJEI.get()) {
+      manager.addIngredientsAtRuntime(ForgeTypes.FLUID_STACK,
+                                      BuiltInRegistries.POTION.holders().filter(holder -> {
+                                        Potion potion = holder.get();
+                                        return potion != Potions.EMPTY && potion != Potions.WATER;
+                                      }).map(holder -> PotionFluidType.potionFluid(holder.key(), FluidType.BUCKET_VOLUME)).toList());
+    }
+    // remove variantless potion fluid
+    removeFluid(manager, TinkerFluids.potion.get());
+
     modIdHelper = jeiRuntime.getJeiHelpers().getModIdHelper();
-  }
-
-  /** Class to pass {@link IScreenWithFluidTank} into JEI */
-  public static class GuiContainerTankHandler<C extends AbstractContainerMenu, T extends AbstractContainerScreen<C> & IScreenWithFluidTank> implements IGuiContainerHandler<T> {
-    @Override
-    public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(T containerScreen, double mouseX, double mouseY) {
-      FluidLocation fluid = containerScreen.getFluidUnderMouse((int)mouseX, (int)mouseY);
-      if (fluid != null) {
-        return Optional.of(new ClickableIngredient<>(ForgeTypes.FLUID_STACK, fluid.fluid(), fluid.location()));
-      }
-      return Optional.empty();
-    }
-  }
-
-  /** Subtype interpreter for tools, treats the tool as unique in ingredient list, generic in recipes */
-  public enum ToolSubtypeInterpreter implements IIngredientSubtypeInterpreter<ItemStack> {
-    ALWAYS, INGREDIENT;
-
-    @Override
-    public String apply(ItemStack itemStack, UidContext context) {
-      if (this == ALWAYS || context == UidContext.Ingredient) {
-        StringBuilder builder = new StringBuilder();
-        List<MaterialVariantId> materialList = MaterialIdNBT.from(itemStack).getMaterials();
-        if (!materialList.isEmpty()) {
-          // append first entry without a comma
-          builder.append(materialList.get(0));
-          for (int i = 1; i < materialList.size(); i++) {
-            builder.append(',');
-            builder.append(materialList.get(i).getId());
-          }
-        }
-        return builder.toString();
-      }
-      return NONE;
-    }
   }
 }

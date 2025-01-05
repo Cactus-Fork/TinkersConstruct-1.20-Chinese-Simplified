@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.common;
 
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageType;
@@ -30,6 +32,11 @@ public class TinkerTags {
     Modifiers.init();
     Materials.init();
     DamageTypes.init();
+  }
+
+  /** Creates a tag that hides things from JEI */
+  private static <R> TagKey<R> hiddenFromRecipeViewers(ResourceKey<? extends Registry<R>> registry) {
+    return TagKey.create(registry, new ResourceLocation("c", "hidden_from_recipe_viewers"));
   }
 
   public static class Blocks {
@@ -170,6 +177,8 @@ public class TinkerTags {
     /** List of blocks that should produce bonus gold nugget drops from the chrysophilite modifier. Will only drop bonus if the block does not drop itself */
     public static final TagKey<Block> CHRYSOPHILITE_ORES = tag("chrysophilite_ores");
 
+    // misc compat
+    public static final TagKey<Block> BUDDING = forgeTag("budding");
     // ceramics compat
     public static final TagKey<Block> CISTERN_CONNECTIONS = TagKey.create(Registries.BLOCK, new ResourceLocation("ceramics", "cistern_connections"));
 
@@ -475,7 +484,9 @@ public class TinkerTags {
     public static final TagKey<Fluid> EXPENSIVE_METAL_SPILLING = tag("spilling/metal/expensive");
 
     /** Fluids in this tag won't show in the creative filled tanks */
-    public static final TagKey<Fluid> HIDE_IN_CREATIVE = tag("hide_in_creative");
+    public static final TagKey<Fluid> HIDE_IN_CREATIVE_TANKS = tag("hide_in_creative_tanks");
+    /** Fluids in this tag won't show in JEI */
+    public static final TagKey<Fluid> HIDDEN_IN_RECIPE_VIEWERS = hiddenFromRecipeViewers(Registries.FLUID);
 
     private static TagKey<Fluid> tag(String name) {
       return TagKey.create(Registries.FLUID, TConstruct.getResource(name));
@@ -518,7 +529,9 @@ public class TinkerTags {
 
   public static class TileEntityTypes {
     private static void init() {}
-    public static final TagKey<BlockEntityType<?>> CRAFTING_STATION_BLACKLIST = tag("crafting_station_blacklist");
+
+    /** Block entities in this tag can be used as a side inventory for the crafting station and alike */
+    public static final TagKey<BlockEntityType<?>> SIDE_INVENTORIES = tag("side_inventories");
 
     @SuppressWarnings("SameParameterValue")  // may want more tags later
     private static TagKey<BlockEntityType<?>> tag(String name) {
