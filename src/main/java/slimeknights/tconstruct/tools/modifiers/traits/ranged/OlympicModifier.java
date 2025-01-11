@@ -26,14 +26,16 @@ import slimeknights.tconstruct.library.modifiers.hook.ranged.ProjectileLaunchMod
 import slimeknights.tconstruct.library.module.ModuleHookMap.Builder;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModifierNBT;
-import slimeknights.tconstruct.library.tools.nbt.NamespacedNBT;
+import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.shared.TinkerMaterials;
 
 import javax.annotation.Nullable;
 
+import static slimeknights.mantle.Mantle.commonResource;
+
 public class OlympicModifier extends Modifier implements ProjectileLaunchModifierHook, ProjectileHitModifierHook {
   private static final ResourceLocation OLYMPIC_START = TConstruct.getResource("olympic_start");
-  private static final TagKey<Item> PLATINUM_NUGGET = ItemTags.create(new ResourceLocation("forge", "nuggets/platinum"));
+  private static final TagKey<Item> PLATINUM_NUGGET = ItemTags.create(commonResource("nuggets/platinum"));
 
   /** Gets the nugget for the given distance */
   private static Item getNugget(double distanceSq) {
@@ -62,7 +64,7 @@ public class OlympicModifier extends Modifier implements ProjectileLaunchModifie
   }
 
   @Override
-  public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter, Projectile projectile, @Nullable AbstractArrow arrow, NamespacedNBT persistentData, boolean primary) {
+  public void onProjectileLaunch(IToolStackView tool, ModifierEntry modifier, LivingEntity shooter, Projectile projectile, @Nullable AbstractArrow arrow, ModDataNBT persistentData, boolean primary) {
     // store fired position
     CompoundTag tag = new CompoundTag();
     tag.putDouble("X", shooter.getX());
@@ -72,7 +74,7 @@ public class OlympicModifier extends Modifier implements ProjectileLaunchModifie
   }
 
   @Override
-  public boolean onProjectileHitEntity(ModifierNBT modifiers, NamespacedNBT persistentData, ModifierEntry modifier, Projectile projectile, EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
+  public boolean onProjectileHitEntity(ModifierNBT modifiers, ModDataNBT persistentData, ModifierEntry modifier, Projectile projectile, EntityHitResult hit, @Nullable LivingEntity attacker, @Nullable LivingEntity target) {
     // 10% chance per level
     Entity targetEntity = hit.getEntity();
     Level level = projectile.level();

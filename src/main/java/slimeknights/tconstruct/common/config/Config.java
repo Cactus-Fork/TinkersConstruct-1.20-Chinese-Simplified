@@ -51,6 +51,7 @@ public class Config {
 
     // debug
     public final BooleanValue forceIntegrationMaterials;
+    public final BooleanValue disableSideInventoryWhitelist;
     public final EnumValue<LogInvalidToolStack> logInvalidToolStack;
     public enum LogInvalidToolStack { STACKTRACE, WARNING, IGNORED }
 
@@ -173,6 +174,10 @@ public class Config {
                  "Does not provide recipes for any of them, they will only be available to cheat in creative.")
         .worldRestart()
         .define("forceIntegrationMaterials", false);
+      this.disableSideInventoryWhitelist = builder
+        .comment("Set to true if you wish to test whether a side inventory works without constantly reloading datapacks.",
+                "Once you find an inventory works, add it to the block entity tag `tconstruct:side_inventories` and disable this option; leaving it enabled will lead to crashes and dupe bugs.")
+        .define("disableSideInventoryWhitelist", false);
       this.logInvalidToolStack = builder
         .comment("If STACKTRACE, logs the stacktrace whenever a tool stack is created from a non-modifiable item. If WARNING (default), logs a shorter but more efficient error. If IGNORE, disables logging (useful for modpacks/players *after* they reported the issue). The stacktrace helps debug which mod is causing it, but is rather expensive on the chance they are doing it a lot.")
         .defineEnum("logInvalidToolStack", LogInvalidToolStack.WARNING);
@@ -186,7 +191,6 @@ public class Config {
   public static class Client {
     //public final ForgeConfigSpec.BooleanValue temperatureInCelsius;
     public final ForgeConfigSpec.BooleanValue tankFluidModel;
-    public final ForgeConfigSpec.BooleanValue extraToolTips; // TODO: do we even need this config option? who would turn it off?
     public final ForgeConfigSpec.BooleanValue logMissingMaterialTextures;
     public final ForgeConfigSpec.BooleanValue logMissingModifierTextures;
     public final ForgeConfigSpec.BooleanValue renderShieldSlotItem;
@@ -225,11 +229,6 @@ public class Config {
          )
         .translation("tconstruct.configgui.tankFluidModel")
         .define("tankFluidModel", false);
-
-      this.extraToolTips = builder
-        .comment("If true tools will show additional info in their tooltips")
-        .translation("tconstruct.configgui.extraToolTips")
-        .define("extraToolTips", true);
 
       this.logMissingMaterialTextures = builder
         .comment("If true, the game will log all material textures which do not exist in resource packs but can be added, can be helpful for moddevs or resourcepack makers")

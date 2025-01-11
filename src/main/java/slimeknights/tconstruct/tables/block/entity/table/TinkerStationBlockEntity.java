@@ -23,6 +23,7 @@ import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.TinkerRecipeTypes;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
 import slimeknights.tconstruct.shared.inventory.ConfigurableInvWrapperCapability;
 import slimeknights.tconstruct.tables.TinkerTables;
 import slimeknights.tconstruct.tables.block.TinkerStationBlock;
@@ -50,6 +51,10 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   private final LazyResultContainer craftingResult;
   /** Crafting inventory for the recipe calls */
   private final TinkerStationContainerWrapper inventoryWrapper;
+
+  /** Current result, may be modified again later */
+  @Nullable
+  private LazyToolStack result = null;
 
   @Nullable
   @Getter
@@ -87,6 +92,20 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     return getContainerSize() - 1;
   }
 
+  /** Gets the tool contained in this block entity */
+  public LazyToolStack getTool() {
+    return inventoryWrapper.getTool();
+  }
+
+  /** Gets the recipe result */
+  @Nullable
+  public LazyToolStack getResult(@Nullable Player player) {
+    // ensure the result has been resolved else we may be returning null when we shouldn't
+    // if we return null that means there is no result, not its not calculated.
+    craftingResult.getResult(player);
+    return result;
+  }
+
   @Override
   public void resize(int size) {
     super.resize(size);
@@ -108,7 +127,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     }
 
     // assume empty unless we learn otherwise
-    ItemStack result = ItemStack.EMPTY;
+    result = null;
     this.currentError = null;
 
     if (!this.level.isClientSide && this.level.getServer() != null) {
@@ -132,7 +151,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
         }
 
         // try for UI errors
-        RecipeResult<ItemStack> validatedResult = recipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
+        RecipeResult<LazyToolStack> validatedResult = recipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
         if (validatedResult.isSuccess()) {
           result = validatedResult.getResult();
         } else if (validatedResult.hasError()) {
@@ -146,7 +165,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
     }
     // client side only needs to update result, server syncs message elsewhere
     else if (this.lastRecipe != null && this.lastRecipe.matches(this.inventoryWrapper, level)) {
-      RecipeResult<ItemStack> validatedResult = this.lastRecipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
+      RecipeResult<LazyToolStack> validatedResult = this.lastRecipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
       if (validatedResult.isSuccess()) {
         result = validatedResult.getResult();
       } else if (validatedResult.hasError()) {
@@ -154,23 +173,29 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       }
     }
 
-    // set name if we have one
-    if (!result.isEmpty() && !itemName.isEmpty()) {
-      TooltipUtil.setDisplayName(result, itemName);
-    }
+    if (result != null) {
+      // set name if we have one
+      if (!itemName.isEmpty()) {
+        TooltipUtil.setDisplayName(result.getStack(), itemName);
+      }
 
-    return result;
+      return result.getStack();
+    } else {
+      return ItemStack.EMPTY;
+    }
   }
 
   @Override
-  public void onCraft(Player player, ItemStack result, int amount) {
-    if (amount == 0 || this.lastRecipe == null || this.level == null) {
+  public void onCraft(Player player, ItemStack resultItem, int amount) {
+    // the recipe should match if we got this far, but being null is a problem
+    LazyToolStack result = this.result;  // result is going to get cleared as we update things
+    if (amount == 0 || this.level == null || this.lastRecipe == null || result == null) {
       return;
     }
 
     // fire crafting events
-    result.onCraftedBy(this.level, player, amount);
-    ForgeEventFactory.firePlayerCraftingEvent(player, result, this.inventoryWrapper);
+    resultItem.onCraftedBy(this.level, player, amount);
+    ForgeEventFactory.firePlayerCraftingEvent(player, resultItem, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // run the recipe, will shrink inputs

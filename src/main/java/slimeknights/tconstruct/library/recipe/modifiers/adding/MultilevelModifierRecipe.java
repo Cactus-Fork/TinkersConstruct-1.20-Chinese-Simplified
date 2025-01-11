@@ -17,7 +17,8 @@ import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.recipe.RecipeResult;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationContainer;
 import slimeknights.tconstruct.library.tools.SlotType.SlotCount;
-import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
+import slimeknights.tconstruct.library.tools.nbt.LazyToolStack;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
@@ -50,7 +51,7 @@ public class MultilevelModifierRecipe extends ModifierRecipe implements IMultiRe
   }
 
   @Override
-  public RecipeResult<ItemStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
     ToolStack tool = inv.getTinkerable();
 
     // next few checks depend on the current level to decide
@@ -81,7 +82,7 @@ public class MultilevelModifierRecipe extends ModifierRecipe implements IMultiRe
 
     // consume slots
     tool = tool.copy();
-    ModDataNBT persistentData = tool.getPersistentData();
+    ToolDataNBT persistentData = tool.getPersistentData();
     if (slots != null) {
       persistentData.addSlots(slots.type(), -slots.count());
     }
@@ -94,8 +95,7 @@ public class MultilevelModifierRecipe extends ModifierRecipe implements IMultiRe
     if (toolValidation != null) {
       return RecipeResult.failure(toolValidation);
     }
-
-    return RecipeResult.success(tool.createStack(Math.min(inv.getTinkerableSize(), shrinkToolSlotBy())));
+    return success(tool, inv);
   }
 
 

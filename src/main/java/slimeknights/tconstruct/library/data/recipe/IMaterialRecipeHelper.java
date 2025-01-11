@@ -6,7 +6,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.crafting.conditions.OrCondition;
-import net.minecraftforge.fluids.FluidStack;
 import slimeknights.mantle.recipe.data.IRecipeHelper;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.registration.object.FluidObject;
@@ -19,6 +18,9 @@ import slimeknights.tconstruct.library.recipe.melting.MaterialMeltingRecipeBuild
 
 import javax.annotation.Nullable;
 import java.util.function.Consumer;
+
+import static slimeknights.mantle.Mantle.COMMON;
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
 
 /**
  * Interface for adding recipes for tool materials
@@ -67,73 +69,69 @@ public interface IMaterialRecipeHelper extends IRecipeHelper {
     Consumer<FinishedRecipe> wrapped = optional ? withCondition(consumer, tagCondition("ingots/" + name)) : consumer;
     String matName = material.getLocation('/').getPath();
     // ingot
-    TagKey<Item> ingotTag = getItemTag("forge", "ingots/" + name);
+    TagKey<Item> ingotTag = getItemTag(COMMON, "ingots/" + name);
     materialRecipe(wrapped, material, Ingredient.of(ingotTag), 1, 1, folder + matName + "/ingot");
     // nugget
     wrapped = optional ? withCondition(consumer, tagCondition("nuggets/" + name)) : consumer;
-    materialRecipe(wrapped, material, Ingredient.of(getItemTag("forge", "nuggets/" + name)), 1, 9, folder + matName + "/nugget");
+    materialRecipe(wrapped, material, Ingredient.of(getItemTag(COMMON, "nuggets/" + name)), 1, 9, folder + matName + "/nugget");
     // block
     wrapped = optional ? withCondition(consumer, tagCondition("storage_blocks/" + name)) : consumer;
-    materialRecipe(wrapped, material, Ingredient.of(getItemTag("forge", "storage_blocks/" + name)), 9, 1, ItemOutput.fromTag(ingotTag), folder + matName + "/block");
+    materialRecipe(wrapped, material, Ingredient.of(getItemTag(COMMON, "storage_blocks/" + name)), 9, 1, ItemOutput.fromTag(ingotTag), folder + matName + "/block");
   }
 
   /** Adds recipes to melt a material */
   default void materialMelting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, Fluid fluid, int fluidAmount, String folder) {
-    MaterialMeltingRecipeBuilder.material(material, new FluidStack(fluid, fluidAmount))
+    MaterialMeltingRecipeBuilder.material(material, fluid, fluidAmount)
+                                .save(consumer, location(folder + "melting/" + material.getLocation('_').getPath()));
+  }
+
+  /** Adds recipes to melt a material */
+  default void materialMelting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, int fluidAmount, String folder) {
+    MaterialMeltingRecipeBuilder.material(material, fluid, fluidAmount)
                                 .save(consumer, location(folder + "melting/" + material.getLocation('_').getPath()));
   }
 
   /** Adds recipes to melt and cast a material */
-  default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, boolean forgeTag, int fluidAmount, String folder) {
+  default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, int fluidAmount, String folder) {
     MaterialFluidRecipeBuilder.material(material)
-                              .setFluid(fluid.ingredient(fluidAmount, forgeTag))
-                              .setTemperature(fluid.getType().getTemperature() - 300)
+                              .setFluid(fluid.ingredient(fluidAmount))
+                              .setTemperature(getTemperature(fluid))
                               .save(consumer, location(folder + "casting/" + material.getLocation('_').getPath()));
-    materialMelting(consumer, material, fluid.get(), fluidAmount, folder);
+    materialMelting(consumer, material, fluid, fluidAmount, folder);
   }
 
   /** Adds recipes to melt and cast a compat material of ingot size */
-  default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, boolean forgeTag, String folder) {
-    materialMeltingCasting(consumer, material, fluid, forgeTag, FluidValues.INGOT, folder);
-  }
-
-  /** Adds recipes to melt and cast a compat material of ingot size with a second tag allowed to make the material exist */
-  default void compatMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialId material, FluidObject<?> fluid, String altTag, String folder) {
-    materialMeltingCasting(withCondition(consumer, new OrCondition(tagCondition("ingots/" + material.getPath()), tagCondition("ingots/" + altTag))), material, fluid, true, folder);
-  }
-
-  /** Adds recipes to melt and cast a material of ingot size */
-  default void compatMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialId material, FluidObject<?> fluid, String folder) {
-    materialMeltingCasting(withCondition(consumer, tagCondition("ingots/" + material.getPath())), material, fluid, true, folder);
-  }
-
-  /** Adds recipes to melt and cast a material */
-  default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, int fluidAmount, String folder) {
-    materialMeltingCasting(consumer, material, fluid, false, fluidAmount, folder);
-  }
-
-  /** Adds recipes to melt and cast a material of ingot size */
   default void materialMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialVariantId material, FluidObject<?> fluid, String folder) {
     materialMeltingCasting(consumer, material, fluid, FluidValues.INGOT, folder);
   }
 
-  /** Adds recipes to melt and cast a material of ingot size */
-  default void materialMeltingComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, boolean forgeTag, int amount, String folder) {
-    materialMelting(consumer, output, fluid.get(), amount, folder);
-    materialComposite(consumer, input, output, fluid, forgeTag, amount, folder);
+  /** Adds recipes to melt and cast a compat material of ingot size with a second tag allowed to make the material exist */
+  default void compatMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialId material, FluidObject<?> fluid, String altTag, String folder) {
+    materialMeltingCasting(withCondition(consumer, new OrCondition(tagCondition("ingots/" + material.getPath()), tagCondition("ingots/" + altTag))), material, fluid, folder);
   }
 
   /** Adds recipes to melt and cast a material of ingot size */
-  default void materialComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, boolean forgeTag, int amount, String folder, String name) {
+  default void compatMeltingCasting(Consumer<FinishedRecipe> consumer, MaterialId material, FluidObject<?> fluid, String folder) {
+    materialMeltingCasting(withCondition(consumer, tagCondition("ingots/" + material.getPath())), material, fluid, folder);
+  }
+
+  /** Adds recipes to melt and cast a material of ingot size */
+  default void materialMeltingComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, int amount, String folder) {
+    materialMelting(consumer, output, fluid, amount, folder);
+    materialComposite(consumer, input, output, fluid, amount, folder);
+  }
+
+  /** Adds recipes to melt and cast a material of ingot size */
+  default void materialComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, int amount, String folder, String name) {
     MaterialFluidRecipeBuilder.material(output)
                               .setInputId(input)
-                              .setFluid(fluid.ingredient(amount, forgeTag))
-                              .setTemperature(fluid.getType().getTemperature() - 300)
+                              .setFluid(fluid.ingredient(amount))
+                              .setTemperature(getTemperature(fluid))
                               .save(consumer, location(folder + "composite/" + name));
   }
 
   /** Adds recipes to melt and cast a material of ingot size */
-  default void materialComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, boolean forgeTag, int amount, String folder) {
-    materialComposite(consumer, input, output, fluid, forgeTag, amount, folder, output.getLocation('_').getPath());
+  default void materialComposite(Consumer<FinishedRecipe> consumer, MaterialVariantId input, MaterialVariantId output, FluidObject<?> fluid, int amount, String folder) {
+    materialComposite(consumer, input, output, fluid, amount, folder, output.getLocation('_').getPath());
   }
 }

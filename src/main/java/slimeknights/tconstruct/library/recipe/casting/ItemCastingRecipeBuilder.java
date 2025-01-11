@@ -21,6 +21,8 @@ import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 import java.util.function.Consumer;
 
+import static slimeknights.tconstruct.library.recipe.melting.IMeltingRecipe.getTemperature;
+
 /**
  * Builder for an item casting recipe. Takes a fluid and optional cast to create an item
  */
@@ -182,22 +184,12 @@ public class ItemCastingRecipeBuilder extends AbstractRecipeBuilder<ItemCastingR
   /**
    * Sets the fluid for this recipe, and cooling time
    * @param fluid      Fluid object instance
-   * @param forgeTag   If true, uses the forge tag
    * @param amount     amount of fluid
    */
-  public ItemCastingRecipeBuilder setFluidAndTime(FluidObject<?> fluid, boolean forgeTag, int amount) {
-    setFluid(fluid.ingredient(amount, forgeTag));
-    setCoolingTime(fluid.getType().getTemperature() - 300, amount);
-    return this;
-  }
-
-  /**
-   * Sets the fluid for this recipe using the forge tag, and cooling time
-   * @param fluid    Fluid object instance
-   * @param amount   amount of fluid
-   */
   public ItemCastingRecipeBuilder setFluidAndTime(FluidObject<?> fluid, int amount) {
-    return setFluidAndTime(fluid, false, amount);
+    setFluid(fluid.ingredient(amount));
+    setCoolingTime(getTemperature(fluid), amount);
+    return this;
   }
 
   /* Cast */

@@ -36,6 +36,7 @@ import slimeknights.mantle.util.BlockEntityHelper;
 import slimeknights.mantle.util.RetexturedHelper;
 import slimeknights.tconstruct.common.multiblock.IMasterLogic;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
+import slimeknights.tconstruct.library.client.model.ModelProperties;
 import slimeknights.tconstruct.smeltery.block.controller.ControllerBlock;
 import slimeknights.tconstruct.smeltery.block.controller.SmelteryControllerBlock;
 import slimeknights.tconstruct.smeltery.block.entity.module.EntityMeltingModule;
@@ -83,7 +84,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   /** Number of ticks the error will remain visible for */
   private int errorVisibleFor = 0;
   /** Temporary hack until forge fixes {@link #onLoad()}, do a first tick listener here as drains don't tick */
-  private boolean addedDrainListeners = false;
+  private boolean addedFluidListeners = false;
 
   /* Saved data, written to Tag */
   /** Current structure contents */
@@ -164,26 +165,40 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     }
   }
 
+  /** Updates all drain listeners */
+  private void updateFluidListeners(StructureData newStructure) {
+    if (level != null) {
+      // we never actually sync to client that the structure was removed, only added or changed
+      // as a result, we have no idea which positions we already have listeners for and which positions are new
+      // easiest approach is to just clear the list and rescan the whole structure; saves having to validate old listeners and ensure no duplicates
+      fluidDisplayListeners.clear();
+      newStructure.forEachContained(sPos -> {
+        if (level.hasChunkAt(sPos) && level.getBlockEntity(sPos) instanceof IDisplayFluidListener listener) {
+          fluidDisplayListeners.add(new WeakReference<>(listener));
+        }
+      });
+
+      // if we have listeners and a fluid, send a first update
+      if (!fluidDisplayListeners.isEmpty()) {
+        FluidStack fluid = tank.getFluidInTank(0);
+        if (!fluid.isEmpty()) {
+          updateListeners(fluid.copy());
+        }
+      }
+    }
+  }
+
   /** Handles the client tick */
   protected void clientTick(Level level, BlockPos pos, BlockState state) {
     if (errorVisibleFor > 0) {
       errorVisibleFor--;
     }
-    if (!addedDrainListeners) {
-      addedDrainListeners = true;
+    // forge's onLoad method is called before reading from NBT client side
+    // so a first tick handler is our only choice for reading this
+    if (!addedFluidListeners) {
+      addedFluidListeners = true;
       if (structure != null) {
-        structure.forEachContained(sPos -> {
-          if (level.getBlockEntity(sPos) instanceof IDisplayFluidListener listener) {
-            fluidDisplayListeners.add(new WeakReference<>(listener));
-          }
-        });
-        // if we have listeners and a fluid, send a first update
-        if (!fluidDisplayListeners.isEmpty()) {
-          FluidStack fluid = IDisplayFluidListener.normalizeFluid(tank.getFluidInTank(0));
-          if (!fluid.isEmpty()) {
-            updateListeners(fluid);
-          }
-        }
+        updateFluidListeners(structure);
       }
     }
   }
@@ -403,7 +418,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   @Nonnull
   @Override
   public ModelData getModelData() {
-    return RetexturedHelper.getModelDataBuilder(getTexture()).with(IDisplayFluidListener.PROPERTY, displayFluid).build();
+    return RetexturedHelper.getModelDataBuilder(getTexture()).with(ModelProperties.FLUID_STACK, displayFluid).build();
   }
 
   /**
@@ -413,27 +428,12 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   private void updateDisplayFluid(FluidStack fluid) {
     if (level != null && level.isClientSide) {
       // update ourself
-      this.displayFluid = IDisplayFluidListener.normalizeFluid(fluid);
+      this.displayFluid = fluid.copy();
       this.requestModelDataUpdate();
       BlockState state = getBlockState();
       level.sendBlockUpdated(worldPosition, state, state, 48);
       updateListeners(displayFluid);
     }
-  }
-
-  @Override
-  public void addDisplayListener(IDisplayFluidListener listener) {
-    boolean have = false;
-    for (WeakReference<IDisplayFluidListener> existing : fluidDisplayListeners) {
-      if (existing.get() == listener) {
-        have = true;
-        break;
-      }
-    }
-    if (!have) {
-      fluidDisplayListeners.add(new WeakReference<>(listener));
-    }
-    listener.notifyDisplayFluidUpdated(IDisplayFluidListener.normalizeFluid(tank.getFluidInTank(0)));
   }
 
   @Override
@@ -495,13 +495,11 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   public void setStructureSize(BlockPos minPos, BlockPos maxPos, List<BlockPos> tanks) {
     setStructure(multiblock.createClient(minPos, maxPos, tanks));
     fuelModule.clearCachedDisplayListeners();
+    // not really possible to have no structure here as we don't sync the lack of structure to the client, but better safe
     if (structure == null) {
       fluidDisplayListeners.clear();
     } else {
-      fluidDisplayListeners.removeIf(reference -> {
-        IDisplayFluidListener listener = reference.get();
-        return listener == null || !structure.contains(listener.getListenerPos());
-      });
+      updateFluidListeners(structure);
     }
   }
 
