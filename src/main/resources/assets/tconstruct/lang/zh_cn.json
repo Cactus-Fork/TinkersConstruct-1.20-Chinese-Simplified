@@ -291,7 +291,7 @@
   "pattern.tconstruct.pick_head": "镐头",
   "pattern.tconstruct.small_axe_head": "小型斧刃",
   "pattern.tconstruct.small_blade": "小型剑刃",
-  "pattern.tconstruct.sign_head": "牌板",
+  "pattern.tconstruct.adze_head": "锛头",
   "pattern.tconstruct.bow_limb": "弓臂",
 
   "_comment": "Large Head Patterns",
@@ -304,7 +304,7 @@
   "_comment": "Binding Patterns",
 
   "pattern.tconstruct.tool_binding": "绑定结",
-  "pattern.tconstruct.tough_binding": "Tough Binding",
+  "pattern.tconstruct.tough_binding": "Tough Collar",
   "pattern.tconstruct.bowstring": "弓弦",
   "pattern.tconstruct.maille": "锁链基底",
   "pattern.tconstruct.shield_core": "盾牌基底",
@@ -338,10 +338,9 @@
   "item.tconstruct.pick_head_cast": "镐头金质铸模",
   "item.tconstruct.small_axe_head_cast": "小型斧刃金质铸模",
   "item.tconstruct.small_blade_cast": "小型剑刃金质铸模",
-  "item.tconstruct.sign_head_cast": "牌板金质铸模",
   "item.tconstruct.bow_limb_cast": "弓臂金质铸模",
   "item.tconstruct.bow_grip_cast": "弓把金质铸模",
-  "item.tconstruct.adze_head_cast": "Adze Head Gold Cast",
+  "item.tconstruct.adze_head_cast": "锛头金质铸模",
 
   "_comment": "Large Head Gold Casts",
 
@@ -353,7 +352,7 @@
   "_comment": "Binding Gold Casts",
 
   "item.tconstruct.tool_binding_cast": "绑定结金质铸模",
-  "item.tconstruct.tough_binding_cast": "Tough Binding Gold Cast",
+  "item.tconstruct.tough_binding_cast": "Tough Collar金质铸模",
 
   "_comment": "Tool Handle Gold Casts",
 
@@ -388,10 +387,9 @@
   "item.tconstruct.pick_head_sand_cast": "镐头沙子铸模",
   "item.tconstruct.small_axe_head_sand_cast": "小型斧刃沙子铸模",
   "item.tconstruct.small_blade_sand_cast": "小型剑刃沙子铸模",
-  "item.tconstruct.sign_head_sand_cast": "牌板沙子铸模",
   "item.tconstruct.bow_limb_sand_cast": "弓臂沙子铸模",
   "item.tconstruct.bow_grip_sand_cast": "弓把沙子铸模",
-  "item.tconstruct.adze_head_sand_cast": "Adze Head Sand Cast",
+  "item.tconstruct.adze_head_sand_cast": "锛头沙子铸模",
 
   "_comment": "Large Head Sand Casts",
 
@@ -403,7 +401,7 @@
   "_comment": "Binding Sand Casts",
 
   "item.tconstruct.tool_binding_sand_cast": "绑定结沙子铸模",
-  "item.tconstruct.round_plate_sand_cast": "圆板沙子铸模",
+"item.tconstruct.tough_binding_sand_cast": "Tough Collar沙子铸模",
 
   "_comment": "Tool Handle Sand Casts",
 
@@ -439,10 +437,9 @@
   "item.tconstruct.pick_head_red_sand_cast": "镐头红沙铸模",
   "item.tconstruct.small_axe_head_red_sand_cast": "小型斧刃红沙铸模",
   "item.tconstruct.small_blade_red_sand_cast": "小型剑刃红沙铸模",
-  "item.tconstruct.sign_head_red_sand_cast": "牌板红沙铸模",
   "item.tconstruct.bow_limb_red_sand_cast": "弓臂红沙铸模",
   "item.tconstruct.bow_grip_red_sand_cast": "弓把红沙铸模",
-  "item.tconstruct.adze_head_red_sand_cast": "Adze Head Red Sand Cast",
+  "item.tconstruct.adze_head_red_sand_cast": "锛头红沙铸模",
 
   "_comment": "Large Head Red Sand Casts",
 
@@ -454,7 +451,7 @@
   "_comment": "Binding Red Sand Casts",
 
   "item.tconstruct.tool_binding_red_sand_cast": "绑定结红沙铸模",
-  "item.tconstruct.tough_binding_red_sand_cast": "Tough Binding Red Sand Cast",
+  "item.tconstruct.tough_binding_red_sand_cast": "Tough Collar红沙铸模",
 
   "_comment": "Tool Handle Red Sand Casts",
 
@@ -972,8 +969,8 @@
   "item.tconstruct.tool_handle": "工具手柄",
   "item.tconstruct.tough_handle": "坚韧手柄",
   "item.tconstruct.tool_binding": "绑定结",
-  "item.tconstruct.tough_binding": "Tough Binding",
-  "item.tconstruct.adze_head": "Adze Head",
+  "item.tconstruct.tough_binding": "Tough Collar",
+  "item.tconstruct.adze_head": "锛头",
   "item.tconstruct.large_plate": "大板",
 
   "item.tconstruct.bow_limb": "弓臂",
@@ -1414,7 +1411,8 @@
   "block.tconstruct.greenheart_button": "绿心木按钮",
   "block.tconstruct.greenheart_sign": "绿心木告示牌",
   "block.tconstruct.greenheart_wall_sign": "绿心木告示牌",
-
+  "block.tconstruct.greenheart_hanging_sign": "悬挂式绿心木告示牌",
+  "block.tconstruct.greenheart_wall_hanging_sign": "悬挂式绿心木告示牌",
   "block.tconstruct.skyroot_planks": "天根木板",
   "block.tconstruct.skyroot_planks_slab": "天根木台阶",
   "block.tconstruct.skyroot_planks_stairs": "天根木楼梯",
@@ -1431,7 +1429,8 @@
   "block.tconstruct.skyroot_button": "天根木按钮",
   "block.tconstruct.skyroot_sign": "天根木告示牌",
   "block.tconstruct.skyroot_wall_sign": "天根木告示牌",
-
+  "block.tconstruct.skyroot_hanging_sign": "悬挂式天根木告示牌",
+  "block.tconstruct.skyroot_wall_hanging_sign": "悬挂式天根木告示牌",
   "block.tconstruct.bloodshroom_planks": "血菌木板",
   "block.tconstruct.bloodshroom_planks_slab": "血菌木台阶",
   "block.tconstruct.bloodshroom_planks_stairs": "血菌木楼梯",
@@ -1448,6 +1447,8 @@
   "block.tconstruct.bloodshroom_button": "血菌木按钮",
   "block.tconstruct.bloodshroom_sign": "血菌木告示牌",
   "block.tconstruct.bloodshroom_wall_sign": "血菌木告示牌",
+  "block.tconstruct.bloodshroom_hanging_sign": "悬挂式血菌木告示牌",
+  "block.tconstruct.bloodshroom_wall_hanging_sign": "悬挂式血菌木告示牌",
 
   "block.tconstruct.enderbark_planks": "末影皮木木板",
   "block.tconstruct.enderbark_planks_slab": "末影皮木台阶",
@@ -1471,6 +1472,8 @@
   "block.tconstruct.enderbark_button": "末影皮木按钮",
   "block.tconstruct.enderbark_sign": "末影皮木告示牌",
   "block.tconstruct.enderbark_wall_sign": "末影皮木告示牌",
+  "block.tconstruct.enderbark_hanging_sign": "悬挂式末影皮木告示牌",
+  "block.tconstruct.enderbark_wall_hanging_sign": "悬挂式末影皮木告示牌",
 
 
   "material.tconstruct.unknown": "未知材料",
@@ -1850,7 +1853,6 @@
   "modifier.tconstruct.netherite": "下界合金",
   "modifier.tconstruct.netherite.flavor": "精尖增强！",
   "modifier.tconstruct.netherite.description": "掌控远古金属的力量，增强工具并使其免疫火焰等外界伤害",
-  "modifier.tconstruct.netherite.requirements": "“下界合金”需要加持一个宝石作为前置",
 
   "modifier.tconstruct.overslime": "黏液覆层",
   "modifier.tconstruct.overslime.flavor": "黏糊糊！",
